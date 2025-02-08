@@ -1,0 +1,5 @@
+services:
+    prokrustir.dice.listener:
+        class: prokrustir\dice\event\main_listener
+        tags:
+            - { name: event.listener }
