@@ -6,41 +6,38 @@ $phpEx = substr(strrchr(__FILE__, '.'), 1);
 include($phpbb_root_path . 'common.' . $phpEx);
 include($phpbb_root_path . 'includes/functions_posting.' . $phpEx);
 
-$auth_tokens = array('70' => 'xxxx');
-if (!array_key_exists($_POST['user_id'], $auth_tokens) || $_POST['token'] != $auth_tokens[$_POST['user_id']]) {
+$user_id = $request->variable('user_id',"");
+$username = $request->variable('username',"");
+$message = html_entity_decode($request->variable('message',""));
+$subject = html_entity_decode($request->variable('subject',""));
+$forum_id = $request->variable('forum_id',"");
+$topic_id = $request->variable('topic_id',"");
+$token = $request->variable('token',"");
+
+$auth_tokens = array();
+if (!array_key_exists($user_id, $auth_tokens) || $token != $auth_tokens[$user_id]) {
   die("404 Authentication Error.");
 }
 
+generate_text_for_storage($subject, $uid, $bitfield, $options, false, false, false);
+generate_text_for_storage($message, $uid, $bitfield, $options, true, true, true);
 $session = new \phpbb\session();
-/*
-{
-	"user_id": "70",
-	"username": "Los",
-	"message": "Testowy post z API.",
-	"subject": 'API post',
-	"forum_id": "10",
-	"topic_id": "20"
-}
-*/
 
 $session->session_begin();
-$session->session_create($_POST['user_id'], false, false, false);
+$session->session_create($user_id, false, false, false);
 $poll = array();
-$message = $_POST['message'];
-$subject = $_POST['subject'];
 // https://www.phpbb.com/community/viewtopic.php?t=2346626
-$poll = $uid = $bitfield = $options = ''; 
 
-$user->data['user_id'] = $_POST['user_id'];
+$user->data['user_id'] = $user_id;
 $user->data['is_registered'] = true;
-$user->data['username'] = $_POST['username'];
+$user->data['username'] = $username;
 $user->data['user_colour'] = '';
 $user->data['user_lastmark'] = 0;
 
 $data = array( 
     // General Posting Settings
-    'forum_id'            => $_POST['forum_id'],    // The forum ID in which the post will be placed. (int)
-    'topic_id'            => $_POST['topic_id'],    // Post a new topic or in an existing one? Set to 0 to create a new one, if not, specify your topic ID here instead.
+    'forum_id'            => $forum_id,    // The forum ID in which the post will be placed. (int)
+    'topic_id'            => $topic_id,    // Post a new topic or in an existing one? Set to 0 to create a new one, if not, specify your topic ID here instead.
     'icon_id'            => false,    // The Icon ID in which the post will be displayed with on the viewforum, set to false for icon_id. (int)
 
     // Defining Post Options
@@ -77,4 +74,4 @@ $data = array(
     'force_visibility'            => true, // Allow the post to be submitted without going into unapproved queue, or make it be deleted
 );
 
-$ret=submit_post('reply','subject',$_POST['username'],POST_NORMAL,$poll,$data);
+$ret=submit_post('reply','subject',$username,POST_NORMAL,$poll,$data);
