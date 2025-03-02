@@ -1,5 +1,7 @@
 services:
-    prokrustir.dice.listener:
+    prokrustir.dicedev.listener:
         class: prokrustir\dice\event\main_listener
+        arguments:
+            - '@dbal.conn'
         tags:
             - { name: event.listener }

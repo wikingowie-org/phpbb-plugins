@@ -3,7 +3,7 @@
     "type": "phpbb-extension",
     "description": "Plugin for throwing dice in the post",
     "homepage": "https://github.com/wikingowie-org/phpbb-plugins",
-    "version": "0.1.0",
+    "version": "0.3.0",
     "time": "2024-11-30",
     "keywords": ["phpbb", "extension", "prokrustir", "dice"],
     "license": "GPL-2.0-only",
