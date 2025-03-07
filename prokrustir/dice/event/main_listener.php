@@ -20,7 +20,9 @@ class main_listener implements EventSubscriberInterface {
         return [
             'core.submit_post_end' => 'add_dice_to_post',
 			//'core.viewtopic_post_rowset_data' => 'display_post_with_dice',
-			'core.viewtopic_modify_post_row' => 'display_post_with_dice'
+			'core.viewtopic_modify_post_row' => 'display_post_with_dice',
+			// Topic review while replying to post
+			'core.topic_review_modify_row' => 'display_post_on_topic_review'
         ];
     }
 
@@ -51,14 +53,12 @@ class main_listener implements EventSubscriberInterface {
     }
 	
 	public function display_post_with_dice($event) {
-		$add_text = "";
 		if ($this->is_dice_tag($event['row']['post_text'])) {
 			$post_row = $event['post_row'];
 			$dice_data = $this->get_dice_post_data($event['row']['post_id']);
 			//$row = $event['row'];
 			$post_text = $post_row['MESSAGE'];
-			$add_text .= "Wykonano rzut kością " . $dice_data['command'] . " z wynikiem " . $dice_data['throw'] .".";
-			$post_text = preg_replace('/\[dice\].*?\[\/dice\]/', $add_text, $post_text);
+			$post_text = $this->replace_dice_tag($dice_data, $post_text);
 			$row['post_text'] = $post_text;
 			//$event['row'] = $row;
 			$event['post_row'] = array_merge($event['post_row'], array(
@@ -66,6 +66,25 @@ class main_listener implements EventSubscriberInterface {
 				'DICE_THROW' => $dice_data['command'] . ': ' . $dice_data['throw']
 			));
 		}
+	}
+	
+	public function display_post_on_topic_review($event) {
+		if ($this->is_dice_tag($event['post_row']['MESSAGE'])) {
+			$post_row = $event['post_row'];
+			$dice_data = $this->get_dice_post_data($event['row']['post_id']);
+			$post_text = $post_row['MESSAGE'];
+			$post_text = $this->replace_dice_tag($dice_data, $post_text);
+			$row['post_text'] = $post_text;
+			$event['post_row'] = array_merge($event['post_row'], array(
+				'MESSAGE' => $post_text
+			));			
+		}
+	}
+	
+	function replace_dice_tag($dice_data, $post_text) {
+		$add_text = "Wykonano rzut kością " . $dice_data['command'] . " z wynikiem " . $dice_data['throw'] .".";
+		$post_text = preg_replace('/\[dice\].*?\[\/dice\]/', $add_text, $post_text);
+		return $post_text;
 	}
 	
 	function get_dice_post_data($post_id) {
