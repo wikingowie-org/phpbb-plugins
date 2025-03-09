@@ -4,12 +4,14 @@ namespace prokrustir\dice\event;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use phpbb\db\driver\driver_interface;
+use phpbb\language\language;
 
 class main_listener implements EventSubscriberInterface {
 	
-	public function __construct(driver_interface $db)
+	public function __construct(driver_interface $db, language $language)
 	{
 		$this->db = $db;
+		$this->language = $language;
 	}
     /**
      * Assign functions defined in this class to event listeners in the core
@@ -22,9 +24,20 @@ class main_listener implements EventSubscriberInterface {
 			//'core.viewtopic_post_rowset_data' => 'display_post_with_dice',
 			'core.viewtopic_modify_post_row' => 'display_post_with_dice',
 			// Topic review while replying to post
-			'core.topic_review_modify_row' => 'display_post_on_topic_review'
+			'core.topic_review_modify_row' => 'display_post_on_topic_review',
+			'core.display_custom_bbcodes'				=> 'setup_media_bbcode'
         ];
     }
+	
+	/**
+	 * Set template switch for displaying the [media] BBCode button
+	 *
+	 * @return void
+	 */
+	public function setup_media_bbcode()
+	{
+		$this->language->add_lang('common', 'prokrustir/dice');
+	}
 
     function processText($input) {
 		
