@@ -25,7 +25,8 @@ class main_listener implements EventSubscriberInterface {
 			'core.viewtopic_modify_post_row' => 'display_post_with_dice',
 			// Topic review while replying to post
 			'core.topic_review_modify_row' => 'display_post_on_topic_review',
-			'core.display_custom_bbcodes'				=> 'setup_media_bbcode'
+			'core.display_custom_bbcodes'				=> 'setup_media_bbcode',
+			'core.posting_modify_cannot_edit_conditions' => 'prevent_edit'
         ];
     }
 	
@@ -56,6 +57,15 @@ class main_listener implements EventSubscriberInterface {
         return array();
     }
     
+	public function prevent_edit($event) {
+		if ($this->is_dice_tag($event['post_data']['post_text'])) {
+			if ($this->get_dice_post_data($event['post_data']['post_id'])) {
+				$cant_edit = $event['s_cannot_edit_locked'];
+				$cant_edit = true;
+				$event['s_cannot_edit_locked'] = $cant_edit;
+			}
+		}
+	}
 
     public function add_dice_to_post($event) {
 		$data = $this->processText($event['data']['message']);
