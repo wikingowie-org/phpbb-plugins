@@ -10,6 +10,8 @@ class main_listener implements EventSubscriberInterface {
 	
 	public function __construct(driver_interface $db, language $language)
 	{
+		global $table_prefix;
+		$this->table_prefix = $table_prefix;
 		$this->db = $db;
 		$this->language = $language;
 	}
@@ -70,7 +72,7 @@ class main_listener implements EventSubscriberInterface {
     public function add_dice_to_post($event) {
 		$data = $this->processText($event['data']['message']);
 		if ($data) {
-			$sql = 'INSERT INTO phpbb_dice_posts (dice_post_id, dice_post_command, dice_post_result ) VALUES ('.$event['data']['post_id'].', "'.$data['dice_type'].'x'.$data['repeats'].'", "'.$data['result'].'")';
+			$sql = 'INSERT INTO '. $this->table_prefix .'dice_posts (dice_post_id, dice_post_command, dice_post_result ) VALUES ('.$event['data']['post_id'].', "'.$data['dice_type'].'x'.$data['repeats'].'", "'.$data['result'].'")';
 			$result = $this->db->sql_query($sql);
 		}
     }
@@ -111,7 +113,7 @@ class main_listener implements EventSubscriberInterface {
 	}
 	
 	function get_dice_post_data($post_id) {
-			$sql = 'SELECT * FROM phpbb_dice_posts WHERE dice_post_id = ' . $post_id;
+			$sql = 'SELECT * FROM '. $this->table_prefix .'dice_posts WHERE dice_post_id = ' . $post_id;
 			$result = $this->db->sql_query($sql);
 			if (!$result) {
 				return array();
